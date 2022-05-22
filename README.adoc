@@ -6,14 +6,11 @@ Plees Tracker is a simple sleep tracker for your Android phone.
 
 
 = Elys Changes 
-1. Added Auto stop tracking on phone movement and it can be enabled or disabled in the settings.    
-2. Added delete all sleep data to wipe out all sleep data.   
-3. minor changes? I forgot.   
+- Added Auto stop tracking on phone movement and it can be enabled or disabled in the settings.    
+- Added delete all sleep data to wipe out all sleep data.   
+- minor changes? I forgot.   
 
 
-The latest version is v7.3.2, released on 2022-05-06.  See the
-https://github.com/vmiklos/plees-tracker/blob/master/NEWS.adoc[release notes] and the
-https://github.com/vmiklos/plees-tracker/blob/master/doc/README.adoc[documentation].
 
 == Description
 
