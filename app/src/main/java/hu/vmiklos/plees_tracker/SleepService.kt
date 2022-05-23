@@ -3,8 +3,7 @@
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
- 
- 
+
 package hu.vmiklos.plees_tracker
 
 import android.app.Service
@@ -22,12 +21,11 @@ import kotlin.math.sqrt
 @Suppress("DEPRECATION")
 class SleepService : Service(), SensorEventListener {
 
-
     private var mSensorManager: SensorManager? = null
     private var mAccelerometer: Sensor? = null
     private var mAccel = 0f
     private var mAccelCurrent = 0f
-    private var mAccelLast  = 0f
+    private var mAccelLast = 0f
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -36,7 +34,9 @@ class SleepService : Service(), SensorEventListener {
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         mSensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         mAccelerometer = mSensorManager!!.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        mSensorManager!!.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_UI, Handler())
+        mSensorManager!!.registerListener(
+            this, mAccelerometer, SensorManager.SENSOR_DELAY_UI, Handler()
+        )
         return START_STICKY
     }
 
@@ -60,10 +60,6 @@ class SleepService : Service(), SensorEventListener {
             editor.putBoolean("sleeptrack", false)
             editor.apply()
             Log.i("plees tracker", "SleepService: sleeptrack after phone moved: " + sleeptrack)
-
         }
-
-
-
     }
 }
