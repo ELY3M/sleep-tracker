@@ -3,9 +3,6 @@
 image:https://github.com/ELY3M/sleep-tracker/actions/workflows/android.yml/badge.svg["Build Status", link="https://github.com/ELY3M/sleep-tracker/actions"]
 
 
-[![Android CI](https://github.com/ELY3M/sleep-tracker/actions/workflows/android.yml/badge.svg)](https://github.com/ELY3M/sleep-tracker/actions/workflows/android.yml)
-
-
 Plees Tracker is a simple sleep tracker for your Android phone.
 
 
