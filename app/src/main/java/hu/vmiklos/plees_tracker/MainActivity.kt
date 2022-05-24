@@ -42,12 +42,11 @@ import com.mikepenz.aboutlibraries.LibsBuilder
 import hu.vmiklos.plees_tracker.DataModel.preferences
 import hu.vmiklos.plees_tracker.calendar.CalendarImport
 import hu.vmiklos.plees_tracker.calendar.UserCalendar
+import java.util.Calendar
+import kotlin.math.sqrt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.Calendar
-import kotlin.math.sqrt
-
 
 /**
  * The activity is the primary UI of the app: allows starting and stopping the
@@ -225,22 +224,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, SensorEventListe
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        sensorMan?.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI)
-        val preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-        val sleeptrack = preferences.getBoolean("sleeptrack", false)
-        Log.i("plees tracker", "onResume() sleeptrack: "+sleeptrack)
-        if (!sleeptrack) {
-            Log.i("plees tracker", "onResume() forcing button update...")
-            DataModel.stop = Calendar.getInstance().time
-            viewModel.stopSleep(applicationContext, contentResolver)
-            updateView()
-        }
-
-        updateView()
-    }
-
     override fun onPause() {
         super.onPause()
         sensorMan?.unregisterListener(this)
@@ -259,35 +242,36 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, SensorEventListe
             mAccel = mAccel * 0.9f + delta
             // Make this higher or lower according to how much
             // motion you want to detect
-            //stop recording sleep if phone is moved//
+            // stop recording sleep if phone is moved//
 
-            val isDetectionEnabled = preferences.getBoolean("enable_phone_movement_detection", false)
-            //Start detection - if enabled in prefernces.
+            val isDetectionEnabled = preferences.getBoolean(
+                "enable_phone_movement_detection", false
+            )
+            // Start detection - if enabled in prefernces.
             if (isDetectionEnabled) {
-            val preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-            val sensitive = preferences.getString("phone_movement_weight", "6.3")
-            val sensitivef = sensitive!!.toFloat()
-            //Log.i("plees tracker", "phone movement is set at " + sensitivef)
-            if (mAccel > sensitivef) {
-                Log.i("plees tracker", "movement: " + mAccel.toString())
-                if (DataModel.start != null && DataModel.stop == null) {
-                    DataModel.stop = Calendar.getInstance().time
-                    viewModel.stopSleep(applicationContext, contentResolver)
-                    Log.i("plees tracker", "sleep tracking STOPPED!!! at " + mAccel.toString())
-                    val editor = DataModel.preferences.edit()
-                    editor.putBoolean("sleeptrack", false)
-                    editor.apply()
-                    updateView()
+                val preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+                val sensitive = preferences.getString("phone_movement_weight", "6.3")
+                val sensitivef = sensitive!!.toFloat()
+                // Log.i("pleestracker", "phone movement is set at " + sensitivef)
+                if (mAccel > sensitivef) {
+                    Log.i("pleestracker", "movement: " + mAccel.toString())
+                    if (DataModel.start != null && DataModel.stop == null) {
+                        DataModel.stop = Calendar.getInstance().time
+                        viewModel.stopSleep(applicationContext, contentResolver)
+                        Log.i("pleestracker", "sleep tracking STOPPED!!! at " + mAccel.toString())
+                        val editor = DataModel.preferences.edit()
+                        editor.putBoolean("sleeptrack", false)
+                        editor.apply()
+                        updateView()
+                    }
                 }
             }
-        }
         }
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         // required method
     }
-
 
     override fun onStart() {
         super.onStart()
@@ -300,6 +284,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, SensorEventListe
             // If it is null at this point a lot more must have gone wrong as well.
             recyclerView.adapter?.onBindViewHolder(it, 0)
         }
+        Log.i("pleestracker", "onStart() run...")
+        sensorMan?.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI)
+        updateView()
     }
 
     override fun onStop() {
@@ -311,6 +298,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, SensorEventListe
     }
 
     override fun onClick(view: View?) {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        val sleeptrack = preferences.getBoolean("sleeptrack", false)
+        Log.i("pleestracker", "sleeptrack: " + sleeptrack)
         when (view?.id) {
             R.id.start_stop_layout -> {
                 if (DataModel.start != null && DataModel.stop == null) {
@@ -359,6 +349,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, SensorEventListe
 
         val preferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val sleeptrack = preferences.getBoolean("sleeptrack", false)
+        Log.i("pleestracker", "updateView() sleeptrack: " + sleeptrack)
 
         if (DataModel.start != null && DataModel.stop != null && !sleeptrack) {
             status.text = getString(R.string.tracking_stopped)
@@ -537,4 +528,3 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, SensorEventListe
         private const val TAG = "MainActivity"
     }
 }
-

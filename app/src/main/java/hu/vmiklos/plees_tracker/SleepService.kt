@@ -15,12 +15,15 @@ import android.hardware.SensorManager
 import android.os.Handler
 import android.os.IBinder
 import android.util.Log
+import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
+import java.util.Calendar
 import kotlin.math.sqrt
 
 @Suppress("DEPRECATION")
 class SleepService : Service(), SensorEventListener {
 
+    private lateinit var viewModel: MainViewModel
     private var mSensorManager: SensorManager? = null
     private var mAccelerometer: Sensor? = null
     private var mAccel = 0f
@@ -42,6 +45,9 @@ class SleepService : Service(), SensorEventListener {
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
     override fun onSensorChanged(event: SensorEvent) {
+        viewModel = ViewModelProvider.AndroidViewModelFactory(application)
+            .create(MainViewModel::class.java)
+
         val x: Float = event.values.get(0)
         val y: Float = event.values.get(1)
         val z: Float = event.values.get(2)
@@ -54,12 +60,17 @@ class SleepService : Service(), SensorEventListener {
         val sensitive = preferences.getString("phone_movement_weight", "6.3")
         val sensitivef = sensitive!!.toFloat()
         if (mAccel > sensitivef) {
-
-            Log.i("plees tracker", "SleepService: phone movement: " + mAccel.toString())
-            val editor = DataModel.preferences.edit()
-            editor.putBoolean("sleeptrack", false)
-            editor.apply()
-            Log.i("plees tracker", "SleepService: sleeptrack after phone moved: " + sleeptrack)
+            if (sleeptrack) {
+                Log.i("pleestracker", "SleepService: phone movement: " + mAccel.toString())
+                val editor = DataModel.preferences.edit()
+                editor.putBoolean("sleeptrack", false)
+                editor.apply()
+                Log.i("pleestracker", "SleepService: sleeptrack after phone moved: " + sleeptrack)
+                // need to send stop time to database and do stop process
+                DataModel.stop = Calendar.getInstance().time
+                viewModel.stopSleep(applicationContext, contentResolver)
+                Log.i("pleestracker", "sleep tracking should stop")
+            }
         }
     }
 }
